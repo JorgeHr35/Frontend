@@ -55,7 +55,7 @@ const AdminProductsPage = () => {
       const reader = new FileReader();
 
       reader.onload = () => {
-        const base64Image = reader.result.split(",")[1]; // Eliminar el prefijo Base64
+        const base64Image = reader.result; // Imagen completa en Base64
         setFormData({ ...formData, imagen: base64Image });
       };
 
@@ -74,7 +74,7 @@ const AdminProductsPage = () => {
         descripcion: formData.descripcion,
         precio: formData.precio,
         categoria: formData.categoria,
-        imagen_base64: formData.imagen, // Imagen en Base64
+        imagen_url: formData.imagen, // Imagen en Base64
       };
 
       if (editMode) {
@@ -104,7 +104,7 @@ const AdminProductsPage = () => {
       descripcion: product.descripcion,
       precio: product.precio,
       categoria: product.categoria?._id || "",
-      imagen: null,
+      imagen: product.imagen_url || null, // Cargar la imagen actual si existe
     });
     setProductId(product._id);
     setEditMode(true);
@@ -178,7 +178,7 @@ const AdminProductsPage = () => {
           <div className="flex items-center justify-center">
             <label htmlFor="fileInput" className="cursor-pointer">
               <img
-                src={addPhotoIcon}
+                src={formData.imagen || addPhotoIcon}
                 alt="Agregar Imagen"
                 className="w-20 h-20 object-contain border border-gray-600 rounded-full hover:border-blue-400"
               />
@@ -211,9 +211,8 @@ const AdminProductsPage = () => {
           >
             <img
               src={
-                product.imagen_base64
-                  ? `data:image/png;base64,${product.imagen_base64}`
-                  : "https://via.placeholder.com/400x300"
+                product.imagen_url ||
+                "https://via.placeholder.com/400x400?text=No+Image"
               }
               alt={product.nombre}
               className="w-full h-64 object-cover"
