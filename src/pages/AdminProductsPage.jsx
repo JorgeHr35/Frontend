@@ -16,12 +16,13 @@ const AdminProductsPage = () => {
     descripcion: "",
     precio: "",
     categoria: "",
-    imagen: null,
+    imagen: null, // Guardar la imagen en Base64
   });
   const [editMode, setEditMode] = useState(false);
   const [productId, setProductId] = useState(null);
   const [error, setError] = useState("");
 
+  // Obtener productos y categorías al cargar la página
   useEffect(() => {
     fetchProducts();
     fetchCategories();
@@ -45,31 +46,42 @@ const AdminProductsPage = () => {
     }
   };
 
+  // Manejar cambios en el formulario, incluido el manejo de imágenes
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
     if (name === "imagen" && files.length > 0) {
-      setFormData({ ...formData, imagen: files[0] });
+      const file = files[0];
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const base64Image = reader.result.split(",")[1]; // Eliminar el prefijo Base64
+        setFormData({ ...formData, imagen: base64Image });
+      };
+
+      reader.readAsDataURL(file);
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
+  // Enviar los datos del formulario al backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("nombre", formData.nombre);
-      formDataToSend.append("descripcion", formData.descripcion);
-      formDataToSend.append("precio", formData.precio);
-      formDataToSend.append("categoria", formData.categoria);
-      if (formData.imagen) formDataToSend.append("imagen", formData.imagen);
+      const productData = {
+        nombre: formData.nombre,
+        descripcion: formData.descripcion,
+        precio: formData.precio,
+        categoria: formData.categoria,
+        imagen_base64: formData.imagen, // Imagen en Base64
+      };
 
       if (editMode) {
-        await updateProduct(productId, formDataToSend);
+        await updateProduct(productId, productData);
         setEditMode(false);
       } else {
-        await createProduct(formDataToSend);
+        await createProduct(productData);
       }
 
       setFormData({
@@ -80,7 +92,7 @@ const AdminProductsPage = () => {
         imagen: null,
       });
 
-      fetchProducts();
+      fetchProducts(); // Actualizar lista de productos
     } catch (err) {
       setError("Error al guardar el producto");
     }
@@ -115,7 +127,7 @@ const AdminProductsPage = () => {
 
       {error && <p className="text-red-400 text-center mb-6">{error}</p>}
 
-      {/* Formulario en columna */}
+      {/* Formulario */}
       <div className="bg-gray-800 shadow-lg rounded-lg p-8 mb-8 max-w-2xl mx-auto">
         <h2 className="text-2xl font-bold mb-6 text-blue-300 text-center">
           {editMode ? "Editar Producto" : "Crear Producto"}
@@ -199,8 +211,8 @@ const AdminProductsPage = () => {
           >
             <img
               src={
-                product.imagen_url
-                  ? `http://localhost:4000/${product.imagen_url}`
+                product.imagen_base64
+                  ? `data:image/png;base64,${product.imagen_base64}`
                   : "https://via.placeholder.com/400x300"
               }
               alt={product.nombre}
