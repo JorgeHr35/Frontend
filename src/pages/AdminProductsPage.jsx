@@ -16,7 +16,7 @@ const AdminProductsPage = () => {
     descripcion: "",
     precio: "",
     categoria: "",
-    imagen: null, // Guardar la imagen en Base64
+    imagen_base64: null, // Guardar la imagen en Base64
   });
   const [editMode, setEditMode] = useState(false);
   const [productId, setProductId] = useState(null);
@@ -50,13 +50,19 @@ const AdminProductsPage = () => {
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
-    if (name === "imagen" && files.length > 0) {
+    if (name === "imagen" && files?.length > 0) {
       const file = files[0];
       const reader = new FileReader();
 
+      // Asegurar que el archivo sea una imagen
+      if (!file.type.startsWith("image/")) {
+        setError("Solo se permiten archivos de imagen");
+        return;
+      }
+
       reader.onload = () => {
         const base64Image = reader.result.split(",")[1]; // Eliminar el prefijo Base64
-        setFormData({ ...formData, imagen: base64Image });
+        setFormData({ ...formData, imagen_base64: base64Image });
       };
 
       reader.readAsDataURL(file);
@@ -74,7 +80,7 @@ const AdminProductsPage = () => {
         descripcion: formData.descripcion,
         precio: formData.precio,
         categoria: formData.categoria,
-        imagen_base64: formData.imagen, // Imagen en Base64
+        imagen_base64: formData.imagen_base64 || null, // Solo enviar si no está vacío
       };
 
       if (editMode) {
@@ -89,11 +95,12 @@ const AdminProductsPage = () => {
         descripcion: "",
         precio: "",
         categoria: "",
-        imagen: null,
+        imagen_base64: null,
       });
 
       fetchProducts(); // Actualizar lista de productos
     } catch (err) {
+      console.error("Error al guardar el producto:", err);
       setError("Error al guardar el producto");
     }
   };
@@ -104,7 +111,7 @@ const AdminProductsPage = () => {
       descripcion: product.descripcion,
       precio: product.precio,
       categoria: product.categoria?._id || "",
-      imagen: null,
+      imagen_base64: null, // No editar imagen por defecto
     });
     setProductId(product._id);
     setEditMode(true);
