@@ -1,23 +1,23 @@
-import axios from "axios";
+import API from "./axiosInstance";
 
-const API_URL = "http://localhost:4000/api/auth";
-
+// Registro de usuario
 export const register = async (userData) => {
-    try {
-        const response = await axios.post(`${API_URL}/register`, userData);
-        return response.data;
-    } catch (error) {
-        console.error("Error en la API de registro:", error.response?.data || error.message);
-        throw error;
-    }
+  try {
+    const response = await API.post("/auth/register", userData);
+    return response.data;
+  } catch (error) {
+    console.error("Error en la API de registro:", error.response?.data || error.message);
+    throw error;
+  }
 };
 
+// Inicio de sesión
 export const login = async (credentials) => {
-    try {
-        const response = await axios.post(`${API_URL}/login`, credentials);
-        return response.data;
-    } catch (error) {
-        console.error("Error en la API de inicio de sesión:", error.response?.data || error.message);
-        throw error;
-    }
+  try {
+    const response = await API.post("/auth/login", credentials);
+    return response.data;
+  } catch (error) {
+    console.error("Error en la API de inicio de sesión:", error.response?.data || error.message);
+    throw error;
+  }
 };
