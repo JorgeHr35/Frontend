@@ -212,7 +212,7 @@ const AdminProductsPage = () => {
             <img
               src={
                 product.imagen_base64
-                  ? data:image/png;base64,${product.imagen_base64}
+                  ? `data:image/png;base64,${product.imagen_base64}`
                   : "https://via.placeholder.com/400x300"
               }
               alt={product.nombre}
